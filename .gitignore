@@ -1,0 +1,18 @@
+# Rojo
+out/
+output.rbxl
+output.rbxm
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node (if using npm)
+node_modules/

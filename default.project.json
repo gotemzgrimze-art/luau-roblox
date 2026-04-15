@@ -1,0 +1,27 @@
+{
+  "name": "luau-roblox",
+  "tree": {
+    "$className": "DataModel",
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "server": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterCharacterScripts": {
+        "$className": "StarterCharacterScripts",
+        "character": {
+          "$path": "src/client/character"
+        }
+      },
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "player": {
+          "$path": "src/client/player"
+        }
+      }
+    }
+  }
+}
