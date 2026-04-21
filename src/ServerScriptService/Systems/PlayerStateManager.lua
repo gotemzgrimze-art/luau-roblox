@@ -11,6 +11,7 @@ function PlayerStateManager.new(config, remotes)
 	self.Remotes = remotes
 	self.States = {}
 	self.DamageEnabled = false
+	self.PvpEnabled = false
 	self.PlayerDied = Instance.new("BindableEvent")
 
 	self.PlayerAddedConnection = Players.PlayerAdded:Connect(function(player)
@@ -209,6 +210,14 @@ function PlayerStateManager:SetDamageEnabled(isEnabled)
 	self.DamageEnabled = isEnabled
 end
 
+function PlayerStateManager:SetPvpEnabled(isEnabled)
+	self.PvpEnabled = isEnabled
+end
+
+function PlayerStateManager:IsPvpEnabled()
+	return self.PvpEnabled
+end
+
 function PlayerStateManager:LoadPlayerCharacter(player)
 	player:LoadCharacter()
 	self:_waitForCharacterReady(player)
@@ -232,6 +241,7 @@ end
 
 function PlayerStateManager:ResetPlayersAfterRound(players)
 	self.DamageEnabled = false
+	self.PvpEnabled = false
 
 	for _, player in ipairs(players) do
 		local state = self.States[player]
@@ -272,6 +282,21 @@ function PlayerStateManager:IsPlayerAlive(player)
 	return state ~= nil and state.IsInRound and state.IsAlive
 end
 
+function PlayerStateManager:GetCharacter(player)
+	local state = self.States[player]
+	return state and state.Character or nil
+end
+
+function PlayerStateManager:GetHumanoid(player)
+	local state = self.States[player]
+	return state and state.Humanoid or nil
+end
+
+function PlayerStateManager:GetRootPart(player)
+	local state = self.States[player]
+	return state and state.RootPart or nil
+end
+
 function PlayerStateManager:DamagePlayer(player, amount, reason, bypassProtection)
 	local state = self.States[player]
 	if not state or not state.IsInRound or not state.IsAlive then
@@ -297,6 +322,22 @@ function PlayerStateManager:DamagePlayer(player, amount, reason, bypassProtectio
 	end
 
 	return true
+end
+
+function PlayerStateManager:DamagePlayerFromPlayer(attacker, target, amount, reason)
+	if not self.PvpEnabled then
+		return false
+	end
+
+	if attacker == target then
+		return false
+	end
+
+	if not self:IsPlayerAlive(attacker) or not self:IsPlayerAlive(target) then
+		return false
+	end
+
+	return self:DamagePlayer(target, amount, reason or "PvP")
 end
 
 function PlayerStateManager:EliminatePlayer(player, reason)

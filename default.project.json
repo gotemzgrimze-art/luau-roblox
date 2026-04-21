@@ -2,25 +2,52 @@
   "name": "luau-roblox",
   "tree": {
     "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Modules": {
+        "$className": "Folder",
+        "$path": "src/ReplicatedStorage/Modules"
+      },
+      "Remotes": {
+        "$className": "Folder",
+        "Announcement": {
+          "$className": "RemoteEvent"
+        },
+        "RoundState": {
+          "$className": "RemoteEvent"
+        },
+        "HealthUpdate": {
+          "$className": "RemoteEvent"
+        }
+      }
+    },
     "ServerScriptService": {
       "$className": "ServerScriptService",
-      "server": {
-        "$path": "src/server"
+      "Systems": {
+        "$className": "Folder",
+        "$path": "src/ServerScriptService/Systems"
+      },
+      "Events": {
+        "$className": "Folder",
+        "$path": "src/ServerScriptService/Events"
       }
     },
     "StarterPlayer": {
       "$className": "StarterPlayer",
-      "StarterCharacterScripts": {
-        "$className": "StarterCharacterScripts",
-        "character": {
-          "$path": "src/client/character"
-        }
-      },
       "StarterPlayerScripts": {
         "$className": "StarterPlayerScripts",
-        "player": {
-          "$path": "src/client/player"
+        "ClientController": {
+          "$path": "src/StarterPlayer/StarterPlayerScripts/ClientController.client.lua"
         }
+      }
+    },
+    "StarterGui": {
+      "$className": "StarterGui",
+      "ScreenGui": {
+        "$className": "ScreenGui",
+        "DisplayOrder": 10,
+        "IgnoreGuiInset": true,
+        "ResetOnSpawn": false
       }
     }
   }

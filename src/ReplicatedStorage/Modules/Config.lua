@@ -28,26 +28,91 @@ local Config = {
 		EventDelayBase = 4,
 		EventDelayMin = 2,
 		EventDelayStep = 0.35,
-		EventDurationBase = 8,
-		EventDurationMin = 4,
-		EventDurationStep = 0.35,
 	},
 
 	Events = {
-		MeteorEvent = {
+		Selection = {
+			AvoidImmediateRepeat = true,
+		},
+
+		TralaleloTralalaTsunamiEvent = {
+			Weight = 10,
+			Duration = 6,
+			WarningDuration = 2.25,
+			WaveSpeed = 74,
+			WaveHeight = 18,
+			WaveThickness = 12,
+			Damage = 26,
+			KnockbackHorizontal = 78,
+			KnockbackVertical = 38,
+		},
+
+		BombordiroCrocodileBombEvent = {
+			Weight = 10,
+			Duration = 5,
 			WarningDuration = 2,
-			MeteorHeight = 75,
-			FallDuration = 1.4,
-			ImpactRadius = 18,
-			Damage = 45,
+			BombHeight = 70,
+			DropDuration = 1.35,
+			ExplosionRadius = 16,
+			Damage = 34,
+			KnockbackHorizontal = 82,
+			KnockbackVertical = 42,
 		},
-		FireEvent = {
-			TickRate = 0.5,
-			DamagePerTick = 8,
+
+		LiriliLariraFreezeEvent = {
+			Weight = 8,
+			Duration = 5,
+			WarningDuration = 1.2,
+			FreezeDuration = 3,
+			AffectAllAlive = false,
 		},
-		AlienEvent = {
-			WarningDuration = 2.5,
-			MinimumCollapseDuration = 2,
+
+		BrrBrrPatatimHighJumpEvent = {
+			Weight = 8,
+			Duration = 6,
+			JumpPower = 120,
+			JumpHeight = 28,
+		},
+
+		MeowlLowGravityEvent = {
+			Weight = 7,
+			Duration = 7,
+			GravityScale = 0.42,
+		},
+
+		SlapFightEvent = {
+			Weight = 8,
+			Duration = 8,
+			Damage = 10,
+			KnockbackHorizontal = 86,
+			KnockbackVertical = 34,
+			Cooldown = 0.45,
+			Range = 10,
+			HitboxSize = Vector3.new(10, 7, 10),
+		},
+
+		RocketLauncherMadnessEvent = {
+			Weight = 5,
+			Duration = 8,
+			Damage = 34,
+			KnockbackHorizontal = 96,
+			KnockbackVertical = 46,
+			Cooldown = 1.2,
+			Ammo = 2,
+			ExplosionRadius = 16,
+			ProjectileSpeed = 95,
+			ProjectileLifetime = 4.5,
+		},
+
+		SwordDuelEvent = {
+			Weight = 6,
+			Duration = 7,
+			Damage = 20,
+			KnockbackHorizontal = 58,
+			KnockbackVertical = 24,
+			Cooldown = 0.55,
+			Range = 12,
+			HitboxSize = Vector3.new(9, 8, 13),
 		},
 	},
 }

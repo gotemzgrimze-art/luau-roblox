@@ -20,7 +20,7 @@ function RoundManager.new()
 	self.Remotes = Remotes
 	self.PlatformManager = PlatformManager.new(Config)
 	self.PlayerStateManager = PlayerStateManager.new(Config, Remotes)
-	self.EventManager = EventManager.new(Config, Remotes, self.PlatformManager, self.PlayerStateManager)
+	self.EventManager = EventManager.new(Config, Remotes, self.PlatformManager, self.PlayerStateManager, self)
 	self.IsRoundActive = false
 
 	self.PlayerStateManager:GetDeathSignal():Connect(function(player, reason)
@@ -146,6 +146,7 @@ function RoundManager:_runRound(participants)
 	self.PlayerStateManager:PreparePlayersForRound(participants)
 	self.PlatformManager:AssignPlayers(participants)
 	self.PlayerStateManager:SetDamageEnabled(false)
+	self.PlayerStateManager:SetPvpEnabled(false)
 
 	self:_announce("Round starting")
 
@@ -221,6 +222,7 @@ end
 
 function RoundManager:_finishRound(participants)
 	self.PlayerStateManager:SetDamageEnabled(false)
+	self.PlayerStateManager:SetPvpEnabled(false)
 	self.EventManager:CleanupActiveEvent()
 
 	local winner = self:_resolveWinner()

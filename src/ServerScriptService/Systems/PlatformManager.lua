@@ -98,6 +98,8 @@ function PlatformManager:_buildPlatforms()
 
 			self.Platforms[index] = {
 				Index = index,
+				Row = row,
+				Column = column,
 				Part = platformPart,
 				SpawnCFrame = platformPart.CFrame + self.Config.World.PlatformSpawnOffset,
 				IsEnabled = true,
@@ -116,6 +118,39 @@ end
 
 function PlatformManager:GetAssignedPlatform(player)
 	return self.Assignments[player]
+end
+
+function PlatformManager:GetAssignedPlatformMapping(players)
+	local mapping = {}
+
+	for _, player in ipairs(players) do
+		local platformData = self.Assignments[player]
+		if platformData then
+			mapping[player] = platformData
+		end
+	end
+
+	return mapping
+end
+
+function PlatformManager:GetPlatformByIndex(index)
+	return self.Platforms[index]
+end
+
+function PlatformManager:GetPlatformsInRow(rowIndex)
+	local rowPlatforms = {}
+
+	for _, platformData in ipairs(self.Platforms) do
+		if platformData.Row == rowIndex then
+			table.insert(rowPlatforms, platformData)
+		end
+	end
+
+	table.sort(rowPlatforms, function(left, right)
+		return left.Column < right.Column
+	end)
+
+	return rowPlatforms
 end
 
 function PlatformManager:GetRandomEnabledPlatform(randomObject)
