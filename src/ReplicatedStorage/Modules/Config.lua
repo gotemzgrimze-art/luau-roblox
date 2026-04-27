@@ -17,6 +17,17 @@ local Config = {
 			LobbySpawnPartName = "LobbySpawn",
 			RequireFullGrid = true,
 		},
+		MapBuilder = {
+			Enabled = true,
+			RespectExistingCustomMap = true,
+			LobbyIslandSize = Vector3.new(92, 2, 92),
+			ObservationDeckSize = Vector3.new(42, 2, 36),
+			ObservationOffset = Vector3.new(62, 16, 0),
+			BridgeWidth = 14,
+			VoidBackdropY = -120,
+			VoidBackdropSize = Vector3.new(420, 6, 420),
+			HouseSignHeight = 16,
+		},
 	},
 
 	Health = {

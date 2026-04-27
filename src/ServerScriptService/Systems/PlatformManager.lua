@@ -37,6 +37,22 @@ local function parsePlatformIndex(instance)
 	return nil
 end
 
+local function shouldApplyManagedVisuals(usingPlacedPlatforms, part)
+	return (not usingPlacedPlatforms) or part:GetAttribute("GeneratedByMapBuilder") == true
+end
+
+local function getManagedColor(part)
+	local red = part:GetAttribute("OriginalColorR")
+	local green = part:GetAttribute("OriginalColorG")
+	local blue = part:GetAttribute("OriginalColorB")
+
+	if type(red) == "number" and type(green) == "number" and type(blue) == "number" then
+		return Color3.new(red, green, blue)
+	end
+
+	return Color3.fromRGB(210, 210, 210)
+end
+
 function PlatformManager.new(config)
 	local self = setmetatable({}, PlatformManager)
 
@@ -82,8 +98,8 @@ function PlatformManager:_buildLobby()
 	local lobbySpawnPart = nil
 
 	if placedMapConfig and placedMapConfig.Enabled then
-		lobbySpawnPart = self.Arena:FindFirstChild(placedMapConfig.LobbySpawnPartName)
-			or Workspace:FindFirstChild(placedMapConfig.LobbySpawnPartName)
+		lobbySpawnPart = self.Arena:FindFirstChild(placedMapConfig.LobbySpawnPartName, true)
+			or Workspace:FindFirstChild(placedMapConfig.LobbySpawnPartName, true)
 	end
 
 	if lobbySpawnPart and lobbySpawnPart:IsA("BasePart") then
@@ -283,10 +299,10 @@ function PlatformManager:ResetRound()
 		platformData.IsEnabled = true
 		part.CanCollide = true
 
-		if not self.UsingPlacedPlatforms then
+		if shouldApplyManagedVisuals(self.UsingPlacedPlatforms, part) then
 			part.Transparency = 0
 			part.Material = Enum.Material.Concrete
-			part.Color = Color3.fromRGB(210, 210, 210)
+			part.Color = getManagedColor(part)
 		end
 	end
 end
@@ -299,10 +315,10 @@ function PlatformManager:SetPlatformEnabled(platformData, isEnabled)
 	platformData.IsEnabled = isEnabled
 	platformData.Part.CanCollide = isEnabled
 
-	if not self.UsingPlacedPlatforms then
-		platformData.Part.Transparency = isEnabled and 0 or 0.8
+	if shouldApplyManagedVisuals(self.UsingPlacedPlatforms, platformData.Part) then
+		platformData.Part.Transparency = isEnabled and 0 or 0.55
 		platformData.Part.Material = isEnabled and Enum.Material.Concrete or Enum.Material.ForceField
-		platformData.Part.Color = isEnabled and Color3.fromRGB(210, 210, 210) or Color3.fromRGB(95, 255, 160)
+		platformData.Part.Color = isEnabled and getManagedColor(platformData.Part) or Color3.fromRGB(95, 255, 160)
 	end
 end
 
