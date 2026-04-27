@@ -7,6 +7,36 @@ local ARENA_FOLDER_NAME = "RoundArena"
 local PLATFORMS_FOLDER_NAME = "Platforms"
 local LOBBY_PART_NAME = "LobbyPad"
 
+local function getFirstBasePart(instance)
+	if instance:IsA("BasePart") then
+		return instance
+	end
+
+	if instance:IsA("Model") then
+		if instance.PrimaryPart then
+			return instance.PrimaryPart
+		end
+
+		return instance:FindFirstChildWhichIsA("BasePart", true)
+	end
+
+	return nil
+end
+
+local function parsePlatformIndex(instance)
+	local attributeIndex = instance:GetAttribute("PlatformIndex")
+	if type(attributeIndex) == "number" then
+		return math.floor(attributeIndex)
+	end
+
+	local digits = string.match(instance.Name, "(%d+)$")
+	if digits then
+		return tonumber(digits)
+	end
+
+	return nil
+end
+
 function PlatformManager.new(config)
 	local self = setmetatable({}, PlatformManager)
 
@@ -14,6 +44,7 @@ function PlatformManager.new(config)
 	self.Random = Random.new()
 	self.Platforms = {}
 	self.Assignments = {}
+	self.UsingPlacedPlatforms = false
 
 	self:_buildArena()
 
@@ -39,10 +70,28 @@ function PlatformManager:_buildArena()
 
 	self.PlatformFolder = platformsFolder
 	self:_buildLobby()
-	self:_buildPlatforms()
+
+	local loadedPlacedPlatforms = self:_loadPlacedPlatforms()
+	if not loadedPlacedPlatforms then
+		self:_buildPlatforms()
+	end
 end
 
 function PlatformManager:_buildLobby()
+	local placedMapConfig = self.Config.World.PlacedMap
+	local lobbySpawnPart = nil
+
+	if placedMapConfig and placedMapConfig.Enabled then
+		lobbySpawnPart = self.Arena:FindFirstChild(placedMapConfig.LobbySpawnPartName)
+			or Workspace:FindFirstChild(placedMapConfig.LobbySpawnPartName)
+	end
+
+	if lobbySpawnPart and lobbySpawnPart:IsA("BasePart") then
+		self.LobbyPart = lobbySpawnPart
+		self.LobbySpawnCFrame = lobbySpawnPart.CFrame + Vector3.new(0, 5, 0)
+		return
+	end
+
 	local lobbyPart = self.Arena:FindFirstChild(LOBBY_PART_NAME)
 	if not lobbyPart then
 		lobbyPart = Instance.new("Part")
@@ -61,8 +110,70 @@ function PlatformManager:_buildLobby()
 	self.LobbySpawnCFrame = lobbyPart.CFrame + Vector3.new(0, 5, 0)
 end
 
+function PlatformManager:_makePlatformData(index, platformPart)
+	local gridSize = self.Config.World.PlatformGridSize
+	local row = math.floor((index - 1) / gridSize) + 1
+	local column = ((index - 1) % gridSize) + 1
+
+	return {
+		Index = index,
+		Row = row,
+		Column = column,
+		Part = platformPart,
+		SpawnCFrame = platformPart.CFrame + self.Config.World.PlatformSpawnOffset,
+		IsEnabled = true,
+	}
+end
+
+function PlatformManager:_loadPlacedPlatforms()
+	table.clear(self.Platforms)
+
+	local placedMapConfig = self.Config.World.PlacedMap
+	if not placedMapConfig or not placedMapConfig.Enabled then
+		return false
+	end
+
+	local sourceFolder = self.Arena:FindFirstChild(placedMapConfig.PlatformsFolderName)
+		or Workspace:FindFirstChild(placedMapConfig.PlatformsFolderName)
+	if not sourceFolder then
+		return false
+	end
+
+	local foundPlatforms = {}
+
+	for _, child in ipairs(sourceFolder:GetChildren()) do
+		local platformIndex = parsePlatformIndex(child)
+		local platformPart = getFirstBasePart(child)
+
+		if platformIndex and platformPart and platformIndex >= 1 and platformIndex <= self.Config.MaxPlayers then
+			foundPlatforms[platformIndex] = platformPart
+		end
+	end
+
+	if placedMapConfig.RequireFullGrid then
+		for expectedIndex = 1, self.Config.MaxPlayers do
+			if not foundPlatforms[expectedIndex] then
+				table.clear(self.Platforms)
+				return false
+			end
+		end
+	end
+
+	for index, platformPart in pairs(foundPlatforms) do
+		self.Platforms[index] = self:_makePlatformData(index, platformPart)
+	end
+
+	if #self.Platforms == 0 then
+		return false
+	end
+
+	self.UsingPlacedPlatforms = true
+	return true
+end
+
 function PlatformManager:_buildPlatforms()
 	table.clear(self.Platforms)
+	self.UsingPlacedPlatforms = false
 
 	local size = self.Config.World.PlatformSize
 	local spacing = self.Config.World.PlatformSpacing
@@ -96,14 +207,7 @@ function PlatformManager:_buildPlatforms()
 			platformPart.Transparency = 0
 			platformPart:SetAttribute("PlatformIndex", index)
 
-			self.Platforms[index] = {
-				Index = index,
-				Row = row,
-				Column = column,
-				Part = platformPart,
-				SpawnCFrame = platformPart.CFrame + self.Config.World.PlatformSpawnOffset,
-				IsEnabled = true,
-			}
+			self.Platforms[index] = self:_makePlatformData(index, platformPart)
 		end
 	end
 end
@@ -178,9 +282,12 @@ function PlatformManager:ResetRound()
 		local part = platformData.Part
 		platformData.IsEnabled = true
 		part.CanCollide = true
-		part.Transparency = 0
-		part.Material = Enum.Material.Concrete
-		part.Color = Color3.fromRGB(210, 210, 210)
+
+		if not self.UsingPlacedPlatforms then
+			part.Transparency = 0
+			part.Material = Enum.Material.Concrete
+			part.Color = Color3.fromRGB(210, 210, 210)
+		end
 	end
 end
 
@@ -191,9 +298,12 @@ function PlatformManager:SetPlatformEnabled(platformData, isEnabled)
 
 	platformData.IsEnabled = isEnabled
 	platformData.Part.CanCollide = isEnabled
-	platformData.Part.Transparency = isEnabled and 0 or 0.8
-	platformData.Part.Material = isEnabled and Enum.Material.Concrete or Enum.Material.ForceField
-	platformData.Part.Color = isEnabled and Color3.fromRGB(210, 210, 210) or Color3.fromRGB(95, 255, 160)
+
+	if not self.UsingPlacedPlatforms then
+		platformData.Part.Transparency = isEnabled and 0 or 0.8
+		platformData.Part.Material = isEnabled and Enum.Material.Concrete or Enum.Material.ForceField
+		platformData.Part.Color = isEnabled and Color3.fromRGB(210, 210, 210) or Color3.fromRGB(95, 255, 160)
+	end
 end
 
 function PlatformManager:_shuffleArray(items)
@@ -208,7 +318,9 @@ function PlatformManager:AssignPlayers(players)
 
 	local availablePlatforms = {}
 	for _, platformData in ipairs(self.Platforms) do
-		table.insert(availablePlatforms, platformData)
+		if platformData.IsEnabled then
+			table.insert(availablePlatforms, platformData)
+		end
 	end
 
 	self:_shuffleArray(availablePlatforms)

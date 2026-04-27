@@ -11,6 +11,12 @@ local Config = {
 		LobbyPosition = Vector3.new(-120, 50, 0),
 		LobbySize = Vector3.new(56, 2, 56),
 		FallDeathY = 0,
+		PlacedMap = {
+			Enabled = true,
+			PlatformsFolderName = "MapPlatforms",
+			LobbySpawnPartName = "LobbySpawn",
+			RequireFullGrid = true,
+		},
 	},
 
 	Health = {
