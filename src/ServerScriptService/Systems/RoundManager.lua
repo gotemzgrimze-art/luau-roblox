@@ -5,6 +5,7 @@ local Config = require(ReplicatedStorage.Modules.Config)
 local Remotes = require(ReplicatedStorage.Modules.RemoteDefinitions)
 
 local EventManager = require(script.Parent.EventManager)
+local LeaderboardManager = require(script.Parent.LeaderboardManager)
 local PlatformManager = require(script.Parent.PlatformManager)
 local PlayerStateManager = require(script.Parent.PlayerStateManager)
 
@@ -18,6 +19,7 @@ function RoundManager.new()
 
 	self.Config = Config
 	self.Remotes = Remotes
+	self.LeaderboardManager = LeaderboardManager.new()
 	self.PlatformManager = PlatformManager.new(Config)
 	self.PlayerStateManager = PlayerStateManager.new(Config, Remotes)
 	self.EventManager = EventManager.new(Config, Remotes, self.PlatformManager, self.PlayerStateManager, self)
@@ -227,6 +229,7 @@ function RoundManager:_finishRound(participants)
 
 	local winner = self:_resolveWinner()
 	if winner then
+		self.LeaderboardManager:AwardWin(winner)
 		self:_announce(("%s wins the round"):format(winner.Name))
 	else
 		self:_announce("No winner this round")
